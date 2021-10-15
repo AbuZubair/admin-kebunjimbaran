@@ -37,7 +37,9 @@ class ReportController extends Controller
     {       
         if($request->input('type') == 'penjualan'){
             $query = DB::table('payment')
-                ->leftJoin('order','order.order_no','=','payment.order_no')                         
+                ->leftJoin('order','order.order_no','=','payment.order_no') 
+                ->leftJoin('order_detail','order.order_no','=','order_detail.order_no')
+                ->leftJoin('product','product.id','=','order_detail.product_id')                            
                 ->where('payment_status',1);
                 if($request->input('searchYear')!='')$query->where(DB::raw("YEAR(order.transaction_date)"),$request->input('searchYear'));
                 if($request->input('searchMonth')!='')$query->where(DB::raw("MONTH(order.transaction_date)"),$request->input('searchMonth'));

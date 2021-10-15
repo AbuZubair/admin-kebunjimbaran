@@ -5,6 +5,9 @@
   div.dt-buttons {
     float: none;
   }
+  ul{
+    padding-inline-start: 20px;
+  }
 </style>
 @endpush
 
@@ -35,17 +38,19 @@
         <table id="dynamic-table" class="table yajra-datatable" delete-url="{{url('order/delete')}}" edit-url="{{url('order/edit')}}" data-modal="orderModal" data-checkbox="orders">
             <thead>
                 <tr>
-                <th class="text-center r-sort"><input type="checkbox" id="selectAll" value="selectAll" onClick="toggle(this)"/></th>
+                  <th class="text-center r-sort"><input type="checkbox" id="selectAll" value="selectAll" onClick="toggle(this)"/></th>
                   <th>Order No</th>                 
                   <th>Date</th>                 
                   <th>Name</th>  
                   <th>Phone</th>   
+                  <th>Products</th>
+                  <th>Products</th>
                   <th>Total Amount</th> 
                   <th>Payment Method</th>
                   <th>Status</th> 
                   <th>Status Kirim</th>
                   <th>Status Pembayaran</th>
-                  <th></th>
+                  <th>Action</th>
                 </tr>      
             </thead>
             <tbody>
@@ -85,6 +90,28 @@
             {data: 'transaction_date', name: 'transaction_date'},
             {data: 'fullname', name: 'fullname'},
             {data: 'phone', name: 'phone'},
+            {data: 'products', render:function(data,type,full,meta){
+                var product = data.split(',')
+                let html = '<ul>';
+                for (let i = 0; i < product.length; i++) {
+                  let exp = product[i].split('-')
+                  html += `<li>${exp[0]} - Rp ${formatCurrency(exp[1])}</li>`
+                }
+                html += '</ul>'
+                return html
+              }
+            },
+            {data: 'products', render:function(data,type,full,meta){
+                var product = data.split(',')
+                let html = '';
+                for (let i = 0; i < product.length; i++) {
+                  let exp = product[i].split('-')
+                  if(i>0)html += ', '
+                  html += `${exp[0]} - Rp ${formatCurrency(exp[1])}`
+                }
+                return  html
+              }
+            },
             {data: 'charge_amount', render:function(data,type,full,meta){
                 if(data)return formatCurrency(data)
                   return '-'
@@ -144,19 +171,23 @@
         ],
         columnDefs: [
           {"targets": 0, "orderable": false, "className": 'text-center'},
+          {
+            visible: false,
+            targets: [6]
+          }
         ],
-        // buttons: [
-        //   {
-        //     extend: 'excel',
-        //     exportOptions: {
-        //       columns: [ 1, 2, 3, 4, 5, 6, 7, 9],
-        //       total_index: [4]
-        //     },
-        //     title: 'Pesanan_'+getDate()
-        //   }
-        // ],
-        // dom: 'B<"toolbar">lfrtip',
-        dom: '<"toolbar">lfrtip',
+        buttons: [
+          {
+            extend: 'excel',
+            exportOptions: {
+              columns: [ 1, 2, 3, 4, 6, 7, 9,10,11],
+              total_index: [5]
+            },
+            title: 'Pesanan_'+getDate()
+          }
+        ],
+        dom: 'B<"toolbar">lfrtip',
+        // dom: '<"toolbar">lfrtip',
     });
 
     var btn = `<button class="btn btn-primary" onClick="act('lunas')">Lunas</button>`

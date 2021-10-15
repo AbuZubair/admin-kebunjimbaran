@@ -4,7 +4,7 @@
   <div class="card" style="margin-top: 0 !important;">
     <div class="card-body ">
 
-      <div class="form-group">
+      <div class="form-group" style="display: none;">
         <label class="col-sm-6 col-form-label">{{ __('Value*') }}</label>
         <div class="col-sm-12">
           <div class="form-group{{ $errors->has('ref_value') ? ' has-danger' : '' }}">

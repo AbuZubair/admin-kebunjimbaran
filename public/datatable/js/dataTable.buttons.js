@@ -2121,7 +2121,7 @@ var _exportData = function ( dt, inOpts )
 								sumTotal[group.replace(" ","")+'_'+element] = 0
 								if(last==null)grandTotal[element] = 0
 							}
-							let val = parseFloat((rw.replace(/,(?=.*\.\d+)/g, '')=='-')?0:rw.replace(/,(?=.*\.\d+)/g, ''));
+							let val = parseFloat((rw.replace(/,(?=.*\.\d+)/g, '')=='-')?0:rw.replace(/\./g,''));
 							sumTotal[group.replace(" ","")+'_'+element] += val
 							grandTotal[element] += val							
 						}
@@ -2137,7 +2137,7 @@ var _exportData = function ( dt, inOpts )
 								}else{
 									if(totalRow!==null){
 										if(totalRow.includes(gr)){
-											rowGr[gr] = sumTotal[last.replace(" ","")+'_'+gr].toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "")
+											rowGr[gr] = sumTotal[last.replace(" ","")+'_'+gr].toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 										}else{
 											rowGr[gr] = ''											
 										}									
@@ -2159,8 +2159,10 @@ var _exportData = function ( dt, inOpts )
 			}else{
 				if(totalRow!==null){
 					totalRow.forEach(element => {
-						if(last==null)grandTotal[element] = 0
-						if(j==element){		
+						if (typeof grandTotal[element] == 'undefined') {
+							grandTotal[element] = 0;
+						}
+						if(j==element){	
 							let val = parseFloat((rw.replace(/,(?=.*\.\d+)/g, '')=='-')?0:rw.toString().replace(/\./g,''));
 							grandTotal[element] += val						
 						}
@@ -2174,6 +2176,7 @@ var _exportData = function ( dt, inOpts )
 			if(totalRow && totalRow.includes(j) || header[j].includes('Harga') ){
 				row[j] = parseFloat(rw.toString().replace(/\./g,'')).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")	
 			}else{
+				console.log(rw)
 				row[j] = rw	
 			}			
 														

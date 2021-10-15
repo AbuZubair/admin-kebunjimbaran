@@ -42,7 +42,7 @@ class OrderController extends Controller
                 $order->total_amount = $request->input('total');
                 $order->subtotal_amount = $request->input('subtotal');
                 $order->fullname = $request->input('fullname');
-                $order->email = $request->input('email');
+                // $order->email = $request->input('email');
                 $order->address = $request->input('address');
                 $order->phone = $request->input('phone');
                 $order->delivery_date = date('y-m-d',$t);
@@ -60,7 +60,7 @@ class OrderController extends Controller
                     $link = env("WEB_URL")."/order-detail?q=".$q."&order_no=".$order->order_no." ";
                     $order->link = (string)$link;
                     $order->amount = number_format($order->total_amount);
-                    $this->sharedService->sendEmail($order->email,$order);
+                    // $this->sharedService->sendEmail($order->email,$order);
                     $resp = array(
                         'status' => true,
                         'message' => 'Succesfully',

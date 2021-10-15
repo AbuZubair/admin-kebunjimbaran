@@ -50,9 +50,13 @@ class OrderController extends Controller
 
     public function getData(Request $request)
     {
-        $query = Order::select('order.*','payment.payment_status','payment.charge_amount','payment.payment_type')
-        ->leftJoin('payment','order.order_no','=','payment.order_no');
-        if($request->input('order_no')!='')$query->where('order_no',$request->input('order_no'));
+        $query = Order::select('order.*','payment.payment_status','payment.charge_amount','payment.payment_type',
+        DB::raw("GROUP_CONCAT(CONCAT(product.name_id, '-', order_detail.amount)) AS products"))
+        ->leftJoin('payment','order.order_no','=','payment.order_no')
+        ->leftJoin('order_detail','order.order_no','=','order_detail.order_no')
+        ->leftJoin('product','product.id','=','order_detail.product_id');
+        if($request->input('order_no')!='')$query->where('order.order_no',$request->input('order_no'));
+        $query->groupBy('order.order_no');
         $data = $query->orderByDesc('created_date')->get();
         return Datatables::of($data)               
             ->make(true);

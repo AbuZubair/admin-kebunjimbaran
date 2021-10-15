@@ -11,7 +11,7 @@
                     <th class="text-center r-sort"><input type="checkbox" id="selectAll" value="selectAll" onClick="toggle(this)"/></th>
                     <th>User</th>
                     <th>Phone Number</th>                    
-                    <th>Action</th>
+                    @if(in_array(Auth::user()->getRole(), [0]))<th>Action</th>@endif
                 </tr>
             </thead>
             <tbody>
@@ -40,32 +40,41 @@
 
 @push('js')
 <script type="text/javascript">
-   $(document).ready(function(){
+  var role = "{{Auth::user()->getRole()}}"
+  $(document).ready(function(){
+
+    var _columns = [
+      {data:null,render:function(data,type,full,meta){
+          return '<input type="checkbox" name="users" value="'+data.rowID+'" onClick="singleToggle()"/>';                    
+        }
+      },
+      {data: 'username', name: 'username'},
+      {data: 'phoneNumber', name: 'phoneNumber'},
+    ]
+
+    if(role=='0')_columns.push(
+      {data:null,render:function(data,type,full,meta){
+          return '<button class="btn btn-sm btn-success" onClick="edit('+data.rowID+')">Edit</button>';                    
+        }
+      },
+    )
     
     var table = $('.yajra-datatable').DataTable({
         processing: true,        
         serverSide: true,
         ajax: "{{ route('user.list') }}",
-        columns: [
-            {data:null,render:function(data,type,full,meta){
-                return '<input type="checkbox" name="users" value="'+data.rowID+'" onClick="singleToggle()"/>';                    
-              }
-            },
-            {data: 'username', name: 'username'},
-            {data: 'phoneNumber', name: 'phoneNumber'},
-            {data:null,render:function(data,type,full,meta){
-                return '<button class="btn btn-sm btn-success" onClick="edit('+data.rowID+')">Edit</button>';                    
-              }
-            },
-        ],
+        columns: _columns,
         columnDefs: [
           {"targets": 0, "orderable": false, "className": 'text-center'}
         ],
         dom: '<"toolbar">frtip'
     });
 
-    var btn = '<button class="btn btn-primary" onClick="add()"><i class="material-icons">add</i></button>'
-    btn += '<button class="btn btn-danger" onClick="deleteRow()"><i class="material-icons">delete</i></button>'    
+    var btn = '' 
+    if(role=='0'){
+      btn += '<button class="btn btn-primary" onClick="add()"><i class="material-icons">add</i></button>'
+      btn += '<button class="btn btn-danger" onClick="deleteRow()"><i class="material-icons">delete</i></button>'
+    }
     $("div.toolbar").html(btn);
         
   });  

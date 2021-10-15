@@ -98,7 +98,11 @@
                   <th>Phone</th>
                   <th>Link</th> 
                   <th>Link</th>
-                  <th>Charge Amount</th> 
+                  <th>Product</th> 
+                  <th>Quantity</th>
+                  <th>Harga</th>
+                  <th>Harga Discount</th>
+                  <th>Amount</th>
                 </tr>      
             </thead>
             <tbody>
@@ -192,13 +196,16 @@
   });  
 
   function dtPenjualan(){
-    var groupCol = 6;
+    var groupCol = 1;
     table1 = $('#penjualan-table').DataTable({  
         serverSide: true,        
         dom: "Blf<'clear'><'H'r>t<'F'>p",
         retrieve: true,
         searchable: true,
         lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
+        orderFixed: [
+          [groupCol, 'asc']
+        ],
         columnDefs: [
           {
             searchable: false,
@@ -208,7 +215,7 @@
           }, 
           {
             visible: false,
-            targets: [9]
+            targets: [9,1]
           }
         ],
         ajax: {
@@ -238,7 +245,24 @@
               }
             },
             {data: 'link', name: 'link'},
-            {data: 'charge_amount', render:function(data,type,full,meta){
+            // {data: 'charge_amount', render:function(data,type,full,meta){
+            //     if(data)return formatCurrency(data)
+            //       return '-'
+            //   }
+            // },
+            {data: 'name_id', name: 'name_id'},
+            {data: 'quantity', name: 'quantity'},
+            {data: 'harga', render:function(data,type,full,meta){
+                if(data)return formatCurrency(data)
+                  return '-'
+              }
+            },
+            {data: 'harga_discount', render:function(data,type,full,meta){
+                if(data)return formatCurrency(data)
+                  return '-'
+              }
+            },
+            {data: 'amount', render:function(data,type,full,meta){
                 if(data)return formatCurrency(data)
                   return '-'
               }
@@ -248,8 +272,11 @@
           {
             extend: 'excel',
             exportOptions: {
-              columns: [ 1, 2, 3, 4, 5, 6, 7, 9, 10],
-              total_index: [8]
+              columns: [ 1, 2, 3, 4, 5, 6, 7, 9, 10,11,12,13,14],
+              total_index: [12],
+              grouped_array_index: [0],
+              isGrand: true,
+              total_grand_index: [12]
             },
             title: 'Penjualan_'+getDate()
           }
@@ -288,10 +315,16 @@
                 var group_ = (group)?group.toLowerCase().trim():group
                 if (last_ !== group_) {      
                     groupID++;
-                    // if(last!==null)$(rows).eq(i).before("<tr class='groupTR'><td colspan='3' class='groupTitle'>" + last + "</td><td class='text-right' style='background-color:#9c27b0;color: #fff;'>Total</td></tr>");                    
+                    if(last!==null)$(rows).eq(i).before("<tr class='groupTR'><td colspan='11' class='groupTitle'>Order No: " + last + "</td><td class='text-right' style='background-color:#9c27b0;color: #fff;'>Total</td></tr>");                    
                     last = group;                       
                 }
-                // if(i==length-1)$(rows).eq(i).after("<tr class='groupTR'><td colspan='3' class='groupTitle'>" + last + "</td><td class='text-right' style='background-color:#9c27b0;color: #fff;'>Total</td></tr>");                    
+                // if(i==length-1)$(rows).eq(i).after("<tr class='groupTR'><td colspan='11' class='groupTitle'>" + last + "</td><td class='text-right' style='background-color:#9c27b0;color: #fff;'>Total</td></tr>");                    
+
+                if(i==length-1){
+                  html_ = "<tr class='groupTR'><td colspan='11' class='groupTitle'>Order No: " + last + "</td><td class='text-right' style='background-color:#9c27b0;color: #fff;'>Total</td></tr>"
+                  html_ += "<tr class='grandGT'><td colspan='12' class='groupTitle'><b>Grandtotal</b></td><td class='text-right></td></tr>"
+                  $(rows).eq(i).after(html_);                    
+                }
 
                 //Sub-total of each column within the same grouping
                 var val = api.row(api.row($(rows).eq(i)).index()).data(); //Current order index              
@@ -311,14 +344,20 @@
                     grandTotal[colIndex] += value;
                 });
 
-                if(i==length-1)$(rows).eq(i).after("<tr class='groupTR'><td colspan='8' class='groupTitle'>Grand Total</td><td class='text-right' style='background-color:#9c27b0;color: #fff;'></td></tr>");                    
+                // if(i==length-1)$(rows).eq(i).after("<tr class='groupTR'><td colspan='8' class='groupTitle'>Grand Total</td><td class='text-right' style='background-color:#9c27b0;color: #fff;'></td></tr>");                    
             });      
             
-            $('#penjualan-table tbody').find('.groupTR').each(function (i, v) {                          
+            $('#penjualan-table tbody').find('.groupTR').each(function (i, v) {                     
                 var rowCount = $(this).nextUntil('.groupTR').length;
                 var subTotalInfo = "";                          
-                subTotalInfo += "<td class='groupTD'>" + grandTotal.charge_amount.toFixed(2).toString().replace('.00','').replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "</td>"; 
+                subTotalInfo += "<td class='groupTD'>" + subTotal[i].amount.toFixed(2).toString().replace('.00','').replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "</td>"; 
                 $(this).append(subTotalInfo);
+            });
+
+            $('#penjualan-table tbody').find('.grandGT').each(function (i, v) {                          
+                var gt = "";                          
+                gt += "<td class='grandTD'>" + grandTotal.amount.toFixed(2).toString().replace(".00","").replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "</td>"; 
+                $(this).append(gt);
             });
                                   
         }
